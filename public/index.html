@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>DevOps Práctica - App</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <main>
+      <h1>App de ejemplo - Pipeline DevOps</h1>
+      <form id="item-form">
+        <input id="name" placeholder="Nombre del item" />
+        <button type="submit">Agregar</button>
+      </form>
+      <ul id="items"></ul>
+      <section id="metrics"></section>
+    </main>
+
+    <script>
+      async function loadItems() {
+        const res = await fetch('/api/items');
+        const items = await res.json();
+        const ul = document.getElementById('items');
+        ul.innerHTML = items.map(i => `<li>${i.id} - ${i.name} <small>${i.created_at}</small></li>`).join('');
+      }
+      document.getElementById('item-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const val = document.getElementById('name').value;
+        await fetch('/api/items', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: val }) });
+        document.getElementById('name').value = '';
+        await loadItems();
+      });
+      async function loadMetrics() {
+        const r = await fetch('/metrics');
+        const m = await r.json();
+        document.getElementById('metrics').textContent = JSON.stringify(m);
+      }
+      loadItems();
+      setInterval(loadMetrics, 5000);
+    </script>
+  </body>
+</html>
